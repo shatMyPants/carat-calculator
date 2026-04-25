@@ -2,8 +2,7 @@ import { useState, useRef, useMemo } from 'react'
 import type { Banner, IncomeSelections, JpEvent, PvpEvent } from '../types'
 import { calculateCaratGainToBanner } from '../utils/calculateCaratGain'
 
-import characterImg from '../img/character.png'
-import supportImg from '../img/support.png'
+
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                         */
@@ -145,7 +144,7 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
               <div key={i} className="group/target flex items-center gap-4 flex-1 min-w-[200px] max-w-[260px] hover:max-w-[450px] transition-all duration-500 ease-in-out snap-start py-2">
                 <div className="w-24 aspect-square rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                   <img
-                    src={banner.bannerType === 0 ? characterImg : supportImg}
+                    src={banner.bannerType === 0 ? "/carat-calculator/images/character.png" : "/carat-calculator/images/support.png"}
                     alt={t.charaName}
                     className="w-full h-full object-cover"
                   />

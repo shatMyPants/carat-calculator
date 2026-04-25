@@ -11,25 +11,53 @@ export function BannerDetail({ banner, caratGain }: Props) {
 
   return (
     <section id="banner-detail" className="rounded-2xl bg-neutral-900 border border-neutral-800 p-6">
-      <h2 className="text-lg font-semibold mb-3">
-        Selected Banner #{banner.id}
-        <span className="ml-2 text-sm text-neutral-500">
-          ({banner.bannerType === 0 ? 'Character' : 'Support'})
+      {/* Banner Image */}
+      <div className="mb-6 rounded-xl overflow-hidden border border-[var(--vp-c-border)] aspect-[21/9] bg-[var(--vp-c-bg-alt)]">
+        <img 
+          src="/carat-calculator/images/banner.png" 
+          alt="Banner" 
+          className="w-full h-full object-cover opacity-80" 
+          onError={(e) => (e.currentTarget.style.display = 'none')}
+        />
+      </div>
+
+      <div className="flex justify-between items-baseline mb-4">
+        <h2 className="text-xl font-bold text-[var(--vp-c-text-1)]">
+          {banner.targets[0]?.charaName}
+          {banner.targets.length > 1 && ` & ${banner.targets.length - 1} more`}
+        </h2>
+        <span className="text-xs font-black uppercase tracking-widest text-neutral-500">
+          {banner.bannerType === 0 ? 'Character Banner' : 'Support Banner'}
         </span>
-      </h2>
-      <p className="text-sm text-neutral-400 mb-3">
-        EN: {new Date(banner.en_start_date * 1000).toLocaleDateString()} — {new Date(banner.en_end_date * 1000).toLocaleDateString()}
-        {banner.is_predicted && <span className="ml-2 text-blue-400/80">(Predicted)</span>}
-      </p>
-      <p className="text-xs text-neutral-500 mb-3 italic">
-        JP: {new Date(banner.start_date * 1000).toLocaleDateString()} — {new Date(banner.end_date * 1000).toLocaleDateString()}
-      </p>
-      <div className="space-y-1 mb-4">
+      </div>
+
+      <div className="flex flex-col gap-1 mb-6">
+        <div className="flex items-center gap-2 text-sm text-[var(--vp-c-text-2)] font-medium">
+          <span className="text-[10px] uppercase font-black tracking-tighter text-neutral-600">EN Window</span>
+          <span>{new Date(banner.en_start_date * 1000).toLocaleDateString()} — {new Date(banner.en_end_date * 1000).toLocaleDateString()}</span>
+          {banner.is_predicted && <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-800/30">Predicted</span>}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-neutral-500 italic">
+          <span className="text-[10px] uppercase font-black tracking-tighter text-neutral-700 not-italic">JP Original</span>
+          <span>{new Date(banner.start_date * 1000).toLocaleDateString()} — {new Date(banner.end_date * 1000).toLocaleDateString()}</span>
+        </div>
+      </div>
+
+      {/* Target Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {banner.targets.map((t, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            <span className="text-red-400">★</span>
-            <span className="font-medium">{t.charaName}</span>
-            <span className="text-neutral-500">{t.cardTitle ?? t.supportCardTitle}</span>
+          <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-[var(--vp-c-bg-alt)] border border-[var(--vp-c-border)]">
+            <div className="w-16 h-16 rounded-lg bg-neutral-900 border border-neutral-800 overflow-hidden shrink-0 shadow-inner">
+              <img 
+                src={banner.bannerType === 0 ? "/carat-calculator/images/character.png" : "/carat-calculator/images/support.png"} 
+                alt={t.charaName} 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="text-sm font-bold text-[var(--vp-c-text-1)] truncate leading-tight mb-1">{t.charaName}</div>
+              <div className="text-[11px] text-[var(--vp-c-text-3)] font-medium line-clamp-2 leading-relaxed">{t.cardTitle || t.supportCardTitle}</div>
+            </div>
           </div>
         ))}
       </div>
