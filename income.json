@@ -1,0 +1,158 @@
+{
+  "free_income": {
+    "team_trial_weekly": {
+      "Class 6": 375,
+      "Class 5.5": 262,
+      "Class 5": 225,
+      "Class 4": 150,
+      "Class 3": 75,
+      "Class 2": 35,
+      "Class 1": 0
+    },
+    "club_rank_monthly": {
+      "SS": {
+        "carats": 4500,
+        "info": "1-10"
+      },
+      "S+": {
+        "carats": 3600,
+        "info": "11-30"
+      },
+      "S": {
+        "carats": 3150,
+        "info": "31-100"
+      },
+      "A+": {
+        "carats": 2700,
+        "info": "101-500"
+      },
+      "A": {
+        "carats": 2250,
+        "info": "501-1000"
+      },
+      "B+": {
+        "carats": 1800,
+        "info": "1001-3000"
+      },
+      "B": {
+        "carats": 1350,
+        "info": "3001-5000"
+      },
+      "C+": {
+        "carats": 900,
+        "info": "5001-7000"
+      },
+      "C": {
+        "carats": 450,
+        "info": "7001-10000"
+      },
+      "D+": {
+        "carats": 225,
+        "info": "10001+"
+      }
+    },
+    "champions_meeting": {
+      "Champion": {
+        "carats": 3300,
+        "tickets": 5
+      },
+      "Second": {
+        "carats": 2400,
+        "tickets": 4
+      },
+      "Third": {
+        "carats": 1700,
+        "tickets": 3
+      },
+      "Group B 1st": {
+        "carats": 1600,
+        "tickets": 3
+      },
+      "Group B 2nd": {
+        "carats": 1250,
+        "tickets": 2
+      },
+      "Open League": {
+        "carats": 1100,
+        "tickets": 1
+      }
+    },
+    "league_of_heroes": {
+      "Platinum 4": {
+        "carats": 3290,
+        "tickets": 2
+      },
+      "Platinum 3": {
+        "carats": 2790,
+        "tickets": 2
+      },
+      "Platinum 2": {
+        "carats": 2290,
+        "tickets": 2
+      },
+      "Platinum 1": {
+        "carats": 1790,
+        "tickets": 2
+      },
+      "Gold 4": {
+        "carats": 1290,
+        "tickets": 2
+      },
+      "Gold 3": {
+        "carats": 990,
+        "tickets": 1
+      },
+      "Gold 2": {
+        "carats": 690,
+        "tickets": 1
+      },
+      "Gold 1": {
+        "carats": 540,
+        "tickets": 0
+      },
+      "Silver 4": {
+        "carats": 390,
+        "tickets": 0
+      },
+      "Silver 3": {
+        "carats": 290,
+        "tickets": 0
+      },
+      "Silver 2": {
+        "carats": 190,
+        "tickets": 0
+      },
+      "Silver 1": {
+        "carats": 140,
+        "tickets": 0
+      },
+      "Bronze 4": {
+        "carats": 90,
+        "tickets": 0
+      },
+      "Bronze 3": {
+        "carats": 60,
+        "tickets": 0
+      },
+      "Bronze 2": {
+        "carats": 30,
+        "tickets": 0
+      }
+    },
+    "login_bonus_weekly": {
+      "Day 1": 25,
+      "Day 3": 25,
+      "Day 5": 25,
+      "Day 7": 75
+    },
+    "daily_missions": 25
+  },
+  "paid_income": {
+    "packs": {
+      "Daily Carats Pack": {
+        "paid_upfront": 500,
+        "free_daily": 50
+      }
+    }
+  }
+}
