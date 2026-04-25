@@ -53,8 +53,8 @@ export function buildTimeline(): TimelineEntry[] {
   }
 
   for (const p of jpPvp as RawPvp[]) {
-    const enStart = Math.round(EN_LAUNCH + (p.jp_start - JP_LAUNCH) * accel)
-    const enEnd = Math.round(EN_LAUNCH + (p.jp_end - JP_LAUNCH) * accel)
+    const enStart = p.en_start ?? Math.round(EN_LAUNCH + (p.jp_start - JP_LAUNCH) * accel)
+    const enEnd = p.en_end ?? Math.round(EN_LAUNCH + (p.jp_end - JP_LAUNCH) * accel)
 
     entries.push({
       kind: 'pvp',

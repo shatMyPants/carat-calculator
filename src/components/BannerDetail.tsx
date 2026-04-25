@@ -40,18 +40,38 @@ export function BannerDetail({ banner, caratGain }: Props) {
           <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">
             Estimated Gain ({caratGain.daysInWindow} days)
           </p>
-          <div className="flex items-baseline gap-4 flex-wrap mb-4">
-            <span className="text-3xl font-bold text-emerald-400">
-              {caratGain.carats.toLocaleString()}
-            </span>
-            <span className="text-neutral-400 text-sm">carats</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Free Carat Estimate</span>
+              <span className="text-3xl font-bold text-emerald-400">
+                {(caratGain.carats - caratGain.paidCarats).toLocaleString()}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Paid Carat Estimate</span>
+              <span className="text-2xl font-bold text-amber-500">
+                {caratGain.paidCarats.toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-baseline gap-4 flex-wrap mb-4 border-t border-neutral-800 pt-3">
+             <div className="flex flex-col">
+                <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Total Pulls</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-neutral-100">
+                    {Math.floor(caratGain.carats / 150) + caratGain.tickets}
+                  </span>
+                  <span className="text-neutral-500 text-xs">pulls</span>
+                </div>
+             </div>
             {caratGain.tickets > 0 && (
-              <>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">Gacha Tickets</span>
                 <span className="text-xl font-semibold text-amber-400">
-                  +{caratGain.tickets}
+                  {caratGain.tickets}
                 </span>
-                <span className="text-neutral-400 text-sm">gacha tickets</span>
-              </>
+              </div>
             )}
           </div>
 

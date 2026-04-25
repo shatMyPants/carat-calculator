@@ -107,6 +107,10 @@ export default function App() {
             banners={bannersWithEnDates}
             selectedBannerId={selectedBannerId}
             onSelect={setSelectedBannerId}
+            selections={selections}
+            events={jpEvents as JpEvent[]}
+            pvpSchedule={jpPvp as PvpEvent[]}
+            incomeData={incomeData}
           />
           {selectedBanner && (
             <BannerDetail banner={selectedBanner} caratGain={caratGain} />

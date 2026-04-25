@@ -1,5 +1,6 @@
 import incomeData from '../../income.json'
 import type { IncomeSelections, PvpEvent } from '../types'
+import { getAcceleration, jpToEn } from './dateProjection'
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -13,9 +14,12 @@ function countPvpEventsInMonth(
 ): { cm: number; loh: number } {
   let cm = 0
   let loh = 0
+  const accel = getAcceleration()
   for (const e of pvpEvents) {
+    const enStart = e.en_start ?? jpToEn(e.jp_start, accel)
+    const enEnd = e.en_end ?? jpToEn(e.jp_end, accel)
     // An event overlaps the month if its start is before month end AND its end is after month start
-    if (e.en_start < monthEnd && e.en_end > monthStart) {
+    if (enStart < monthEnd && enEnd > monthStart) {
       if (e.type === 'cm') cm++
       else if (e.type === 'loh') loh++
     }

@@ -44,13 +44,14 @@ export function calculateCaratGainToBanner(
   const now = Date.now() / 1000
 
   if (bannerEndDate <= now) {
-    return { carats: 0, tickets: 0, daysInWindow: 0, breakdown: [], eventDetails: [] }
+    return { carats: 0, paidCarats: 0, tickets: 0, daysInWindow: 0, breakdown: [], eventDetails: [] }
   }
 
   const daysInWindow = (bannerEndDate - now) / 86400
   const accel = getAcceleration()
 
   let totalCarats = 0
+  let paidCarats = 0
   let totalTickets = 0
   const breakdown: BreakdownItem[] = []
 
@@ -104,13 +105,17 @@ export function calculateCaratGainToBanner(
   if (selections.daily_carats_pack) {
     const pack = incomeData.paid_income.packs['Daily Carats Pack']
     const packCount = Math.ceil(daysInWindow / 30)
-    const packCarats = packCount * pack.paid_upfront + pack.free_daily * daysInWindow
+    const packPaid = packCount * pack.paid_upfront
+    const packFree = pack.free_daily * daysInWindow
+    const packTotal = packPaid + packFree
+    
     breakdown.push({
       label: `Daily Carats Pack (×${packCount} packs)`,
-      carats: Math.round(packCarats),
+      carats: Math.round(packTotal),
       tickets: 0,
     })
-    totalCarats += packCarats
+    totalCarats += packTotal
+    paidCarats += packPaid
   }
 
   /* ────────── 2. EVENTS (JP→EN projected) ────────── */
@@ -143,7 +148,10 @@ export function calculateCaratGainToBanner(
   let lohCount = 0
 
   for (const pvp of pvpSchedule) {
-    if (pvp.en_end > now && pvp.en_start < bannerEndDate) {
+    const enStart = pvp.en_start ?? jpToEn(pvp.jp_start, accel)
+    const enEnd = pvp.en_end ?? jpToEn(pvp.jp_end, accel)
+
+    if (enEnd > now && enStart < bannerEndDate) {
       if (pvp.type === 'cm') {
         cmCount++
         const entry = (
@@ -194,6 +202,7 @@ export function calculateCaratGainToBanner(
 
   return {
     carats: Math.round(totalCarats),
+    paidCarats: Math.round(paidCarats),
     tickets: totalTickets,
     daysInWindow: Math.round(daysInWindow * 10) / 10,
     breakdown,

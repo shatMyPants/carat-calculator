@@ -1,23 +1,217 @@
-import { useState, useMemo } from 'react'
-import type { Banner } from '../types'
+import { useState, useRef, useMemo } from 'react'
+import type { Banner, IncomeSelections, JpEvent, PvpEvent } from '../types'
+import { calculateCaratGainToBanner } from '../utils/calculateCaratGain'
+
+import characterImg from '../img/character.png'
+import supportImg from '../img/support.png'
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                         */
 /* ------------------------------------------------------------------ */
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10 // Reduced since cards are bigger
 
 /* ------------------------------------------------------------------ */
-/*  Component                                                         */
+/*  Helpers                                                           */
+/* ------------------------------------------------------------------ */
+
+function formatDate(sec: number) {
+  const d = new Date(sec * 1000)
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sub-Component: BannerCard                                          */
+/* ------------------------------------------------------------------ */
+
+interface CardProps {
+  banner: Banner
+  isSelected: boolean
+  onSelect: (id: number | null) => void
+  selections: IncomeSelections
+  events: JpEvent[]
+  pvpSchedule: PvpEvent[]
+  incomeData: any
+}
+
+function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSchedule, incomeData }: CardProps) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const [dragMoved, setDragMoved] = useState(false)
+
+  const gain = useMemo(() => {
+    return calculateCaratGainToBanner(banner.en_end_date, selections, events, pvpSchedule, incomeData)
+  }, [banner.en_end_date, selections, events, pvpSchedule, incomeData])
+
+  const freeCarats = gain.carats - gain.paidCarats
+  const totalPulls = Math.floor(gain.carats / 150) + gain.tickets
+  const miscPulls = gain.tickets
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current || banner.targets.length <= 2) return
+    setIsDragging(true)
+    setDragMoved(false)
+    setStartX(e.pageX - scrollRef.current.offsetLeft)
+    setScrollLeft(scrollRef.current.scrollLeft)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return
+    e.preventDefault()
+    const x = e.pageX - scrollRef.current.offsetLeft
+    const walk = (x - startX) * 2
+    if (Math.abs(walk) > 5) setDragMoved(true)
+    scrollRef.current.scrollLeft = scrollLeft - walk
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  return (
+    <div
+      onClick={(e) => {
+        // Prevent selection if we just finished a drag
+        if (dragMoved) {
+          e.stopPropagation()
+          return
+        }
+        onSelect(isSelected ? null : banner.id)
+      }}
+      className={`relative flex flex-col rounded-xl overflow-hidden transition-all border cursor-pointer
+        ${isSelected
+          ? 'bg-[var(--vp-c-bg-elv)] border-[#FF3939] ring-1 ring-[#FF3939]/30'
+          : 'bg-[var(--vp-c-bg-alt)] border-[var(--vp-c-border)] hover:border-neutral-700'
+        }`}
+    >
+
+      {/* Header: Dates & Action */}
+      <div className="flex justify-between items-center px-6 py-3 border-b border-[var(--vp-c-divider)] bg-[var(--vp-c-bg-soft)]/30">
+        <div className="flex items-baseline gap-5">
+          <span className="text-xl font-extrabold text-[var(--vp-c-text-1)] tracking-tight">
+            {formatDate(banner.en_start_date)} - {formatDate(banner.en_end_date)}
+          </span>
+          <span className="text-xs text-neutral-500 font-semibold tracking-wide">
+            JP Date: {formatDate(banner.start_date)} - {formatDate(banner.end_date)}
+          </span>
+        </div>
+
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200
+          ${isSelected ? 'bg-red-600 text-white scale-110 shadow-lg shadow-red-900/20' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}>
+          {isSelected ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          ) : (
+            <span className="text-2xl font-light mb-0.5">+</span>
+          )}
+        </div>
+      </div>
+
+      {/* Content: Targets & Stats */}
+      <div className="flex px-6 py-6 items-center justify-between gap-10">
+        {/* Targets Entity (Left) */}
+        <div className="flex-1 min-w-0 relative group/carousel">
+          {banner.targets.length > 2 && (
+            <>
+              {/* Fade Indicator */}
+              <div className={`absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none transition-[border-color,box-shadow] duration-300 bg-gradient-to-l to-transparent
+                ${isSelected ? 'from-[var(--vp-c-bg-elv)]' : 'from-[var(--vp-c-bg-alt)]'}`}
+              />
+
+              {/* Scroll Hint */}
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none group-hover/carousel:opacity-0 transition-opacity duration-300">
+                <div className="bg-neutral-800/80 backdrop-blur-sm p-2 rounded-full border border-neutral-700 shadow-xl">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </>
+          )}
+
+          <div
+            ref={scrollRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{ scrollSnapType: isDragging ? 'none' : 'x mandatory' }}
+            className={`flex gap-8 pb-1 ${banner.targets.length > 2 ? 'overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none' : ''}`}
+          >
+            {banner.targets.map((t, i) => (
+              <div key={i} className="group/target flex items-center gap-4 flex-1 min-w-[200px] max-w-[260px] hover:max-w-[450px] transition-all duration-500 ease-in-out snap-start py-2">
+                <div className="w-24 aspect-square rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                  <img
+                    src={banner.bannerType === 0 ? characterImg : supportImg}
+                    alt={t.charaName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="text-base font-bold text-[var(--vp-c-text-1)] leading-tight mb-1 break-words">{t.charaName}</div>
+                  <div className="text-xs text-[var(--vp-c-text-2)] font-medium tracking-tight break-words">{t.cardTitle || t.supportCardTitle}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Vertical Divider */}
+        <div className="h-16 w-px bg-neutral-800/60 shrink-0" />
+
+        {/* Stats Entity (Right) */}
+        <div className="grid grid-cols-2 gap-x-12 gap-y-5 shrink-0 w-[380px]">
+          <div className="flex flex-col">
+            <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider mb-1 whitespace-nowrap">Carat Estimate</span>
+            <span className="text-2xl font-bold text-[#4ADE80] tracking-tighter">{freeCarats.toLocaleString()}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider mb-1 whitespace-nowrap">Paid Carat Estimate</span>
+            <span className="text-2xl font-bold text-[#FBBF24] tracking-tighter">{gain.paidCarats.toLocaleString()}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider mb-1 whitespace-nowrap">Misc Pulls</span>
+            <span className="text-2xl font-bold text-neutral-100">{miscPulls}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider mb-1 whitespace-nowrap">Total Pulls</span>
+            <span className="text-2xl font-bold text-white">{totalPulls}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Component: BannerSection                                          */
 /* ------------------------------------------------------------------ */
 
 interface Props {
   banners: Banner[]
   selectedBannerId: number | null
   onSelect: (id: number | null) => void
+  selections: IncomeSelections
+  events: JpEvent[]
+  pvpSchedule: PvpEvent[]
+  incomeData: any
 }
 
-export function BannerSection({ banners, selectedBannerId, onSelect }: Props) {
+export function BannerSection({
+  banners,
+  selectedBannerId,
+  onSelect,
+  selections,
+  events,
+  pvpSchedule,
+  incomeData
+}: Props) {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<'all' | 'char' | 'support'>('all')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -66,14 +260,14 @@ export function BannerSection({ banners, selectedBannerId, onSelect }: Props) {
 
   return (
     <section id="banner-selector" className="rounded-2xl bg-neutral-900 border border-neutral-800 p-6">
-      <h2 className="text-lg font-semibold mb-4">Banner List</h2>
+      <h2 className="text-lg font-semibold mb-4">Select Target Banner</h2>
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input
           id="banner-search"
           type="text"
-          placeholder="Search by character name..."
+          placeholder="Search by character or card name..."
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="flex-1 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-100 px-3 py-2 text-sm
@@ -85,7 +279,7 @@ export function BannerSection({ banners, selectedBannerId, onSelect }: Props) {
             <button
               key={t}
               onClick={() => handleTypeFilterChange(t)}
-              className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer
+              className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer
                 ${typeFilter === t
                   ? 'bg-red-600 text-white'
                   : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
@@ -97,50 +291,36 @@ export function BannerSection({ banners, selectedBannerId, onSelect }: Props) {
         </div>
       </div>
 
-      <p className="text-xs text-neutral-500 mb-3">{filtered.length} banners</p>
+      <p className="text-xs text-neutral-500 mb-4">{filtered.length} banners found</p>
 
-      {/* Banner list */}
-      <div className="max-h-96 overflow-y-auto space-y-2 pr-1">
-        {visibleBanners.map((b) => {
-          const isSelected = b.id === selectedBannerId
-          const label = b.targets.map((t) => t.charaName).join(', ')
-          const dateStr = new Date(b.en_start_date * 1000).toLocaleDateString()
+      {/* Banner list container */}
+      <div 
+        onScroll={(e) => {
+          const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+          if (scrollHeight - scrollTop <= clientHeight + 500 && hasMore) {
+            setVisibleCount(c => c + PAGE_SIZE);
+          }
+        }}
+        className="space-y-4 max-h-[720px] overflow-y-auto no-scrollbar snap-y snap-mandatory pr-2 scroll-smooth"
+      >
+        {filtered.slice(0, visibleCount).map((b) => (
+          <div key={b.id} className="snap-start py-1">
+            <BannerCard
+              banner={b}
+              isSelected={b.id === selectedBannerId}
+              onSelect={onSelect}
+              selections={selections}
+              events={events}
+              pvpSchedule={pvpSchedule}
+              incomeData={incomeData}
+            />
+          </div>
+        ))}
 
-          return (
-            <button
-              key={b.id}
-              onClick={() => onSelect(isSelected ? null : b.id)}
-              className={`w-full text-left rounded-lg px-4 py-3 transition-all cursor-pointer
-                border ${isSelected
-                  ? 'bg-red-950/40 border-red-700'
-                  : 'bg-neutral-800/60 border-neutral-700/50 hover:border-neutral-600 hover:bg-neutral-800'
-                }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <span className={`text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded
-                    ${b.bannerType === 0 ? 'bg-red-900/60 text-red-300' : 'bg-blue-900/60 text-blue-300'}`}>
-                    {b.bannerType === 0 ? 'CHAR' : 'SUPP'}
-                  </span>
-                  <span className="ml-2 text-sm font-medium truncate">{label}</span>
-                </div>
-                <span className="text-xs text-neutral-500 shrink-0">{dateStr}</span>
-              </div>
-            </button>
-          )
-        })}
-
-        {/* Load more */}
-        {hasMore && (
-          <button
-            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-            className="w-full py-2 text-xs font-medium text-neutral-400 hover:text-neutral-200
-                       bg-neutral-800/40 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer
-                       border border-dashed border-neutral-700"
-          >
-            Show more ({filtered.length - visibleCount} remaining)
-          </button>
-        )}
+        {/* Loading / End indicator */}
+        <div className="py-8 text-center text-neutral-600 text-xs font-medium uppercase tracking-widest">
+          {hasMore ? 'Loading more banners...' : 'End of list'}
+        </div>
       </div>
     </section>
   )

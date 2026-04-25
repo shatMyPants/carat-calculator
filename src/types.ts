@@ -58,8 +58,8 @@ export interface PvpEvent {
   id: number
   jp_start: number
   jp_end: number
-  en_start: number
-  en_end: number
+  en_start: number | null
+  en_end: number | null
 }
 
 /* ------------------------------------------------------------------ */
@@ -74,6 +74,7 @@ export interface BreakdownItem {
 
 export interface CaratGainResult {
   carats: number
+  paidCarats: number
   tickets: number
   daysInWindow: number
   breakdown: BreakdownItem[]
@@ -110,8 +111,8 @@ export interface RawPvp {
   id: number
   jp_start: number
   jp_end: number
-  en_start: number
-  en_end: number
+  en_start: number | null
+  en_end: number | null
 }
 
 /** Unified timeline entry */

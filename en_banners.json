@@ -586,19 +586,5 @@
     "jp_end_date": 1651114799,
     "en_start_date": 1776722400,
     "en_end_date": 1777499999
-  },
-  {
-    "id": 30130,
-    "jp_start_date": 1665975600,
-    "jp_end_date": 1666580399,
-    "en_start_date": 1752444000,
-    "en_end_date": 1752703199
-  },
-  {
-    "id": 30131,
-    "jp_start_date": 1665975600,
-    "jp_end_date": 1666580399,
-    "en_start_date": 1752444000,
-    "en_end_date": 1752703199
   }
 ]
