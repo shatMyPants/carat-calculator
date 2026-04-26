@@ -91,11 +91,16 @@ export default function App() {
     }).filter(Boolean) as any[]
   }, [selectedBanners, bannersWithEnDates, selections])
 
+  const [lastRemoved, setLastRemoved] = useState<SelectedBanner | null>(null)
+  const [showUndo, setShowUndo] = useState(false)
+  const [undoTimer, setUndoTimer] = useState<NodeJS.Timeout | null>(null)
+
   const handleToggleBanner = (id: number) => {
     setSelectedBanners(prev => {
       const exists = prev.find(b => b.bannerId === id)
       if (exists) {
-        return prev.filter(b => b.bannerId !== id)
+        handleRemoveBanner(id)
+        return prev
       } else {
         return [...prev, { bannerId: id, pulls: 0 }]
       }
@@ -107,8 +112,35 @@ export default function App() {
   }
 
   const handleRemoveBanner = (id: number) => {
+    const bannerToRemove = selectedBanners.find(b => b.bannerId === id)
+    if (!bannerToRemove) return
+
+    setLastRemoved(bannerToRemove)
     setSelectedBanners(prev => prev.filter(b => b.bannerId !== id))
+    setShowUndo(true)
+
+    if (undoTimer) clearTimeout(undoTimer)
+    const timer = setTimeout(() => {
+      setShowUndo(false)
+      setLastRemoved(null)
+    }, 5000)
+    setUndoTimer(timer)
   }
+
+  const handleUndoRemove = () => {
+    if (lastRemoved) {
+      setSelectedBanners(prev => [...prev, lastRemoved])
+      setShowUndo(false)
+      setLastRemoved(null)
+      if (undoTimer) clearTimeout(undoTimer)
+    }
+  }
+
+  const deletedBannerName = useMemo(() => {
+    if (!lastRemoved) return ''
+    const banner = bannersWithEnDates.find(b => b.id === lastRemoved.bannerId)
+    return banner?.targets[0]?.charaName || 'Banner'
+  }, [lastRemoved, bannersWithEnDates])
 
   const toggleFocus = () => {
     setFocusSide(prev => prev === 'list' ? 'detail' : 'list')
@@ -236,6 +268,30 @@ export default function App() {
             </aside>
           </div>
         </main>
+      )}
+
+      {/* Undo Notification Toast */}
+      {showUndo && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-1 shadow-2xl shadow-black/50 flex items-center gap-4 min-w-[320px]">
+            <div className="flex-1 pl-4 flex flex-col justify-center">
+              <span className="text-[10px] text-neutral-500 uppercase font-black tracking-widest leading-none mb-1">Banner Removed</span>
+              <span className="text-sm font-bold text-neutral-100 truncate max-w-[200px]">
+                {deletedBannerName}
+              </span>
+            </div>
+            <button
+              onClick={handleUndoRemove}
+              className="bg-red-600 hover:bg-red-500 text-white text-xs font-black uppercase tracking-widest px-6 py-3 rounded-xl transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <path d="M3 10h10a8 8 0 0 1 8 8v2"></path>
+                <polyline points="9 14 5 10 9 6"></polyline>
+              </svg>
+              Undo
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

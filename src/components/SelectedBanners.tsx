@@ -184,16 +184,27 @@ export function SelectedBanners({ selectedBanners, onUpdatePulls, onRemove, isMi
             </div>
 
             {b.caratGain && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 py-2 border-y border-neutral-800/50">
-                  <div className="flex-1">
-                    <span className="text-[9px] text-neutral-600 uppercase font-bold tracking-wider block mb-0.5">Gain</span>
-                    <span className="text-sm font-bold text-neutral-400">+{b.caratGain.carats.toLocaleString()}</span>
+              <div className="space-y-4">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 py-3 border-y border-neutral-800/50">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-neutral-600 uppercase font-bold tracking-wider mb-0.5">Total Carats</span>
+                    <span className="text-sm font-bold text-neutral-300">+{b.caratGain.carats.toLocaleString()}</span>
                   </div>
-                  <div className="w-px h-6 bg-neutral-800" />
-                  <div className="flex-1 text-right">
-                    <span className="text-[9px] text-neutral-600 uppercase font-bold tracking-wider block mb-0.5">Tickets</span>
-                    <span className="text-sm font-bold text-amber-500/80">{b.caratGain.tickets}🎫</span>
+                  <div className="flex flex-col text-right">
+                    <span className="text-[9px] text-neutral-600 uppercase font-bold tracking-wider mb-0.5">Total Pulls</span>
+                    <span className="text-sm font-bold text-emerald-500">
+                      {Math.floor(b.caratGain.carats / 150) + b.caratGain.tickets}
+                      <span className="text-[10px] ml-1 opacity-60 font-black">PULLS</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-neutral-600 uppercase font-bold tracking-wider mb-0.5">Paid Carats</span>
+                    <span className="text-[11px] font-bold text-neutral-500">+{b.caratGain.paidCarats.toLocaleString()}</span>
+                  </div>
+                  <div className="flex flex-col text-right">
+                    <span className="text-[9px] text-neutral-600 uppercase font-bold tracking-wider mb-0.5">Misc Pulls</span>
+                    <span className="text-[11px] font-bold text-amber-500/80">+{b.caratGain.tickets}🎫</span>
                   </div>
                 </div>
 
@@ -204,7 +215,7 @@ export function SelectedBanners({ selectedBanners, onUpdatePulls, onRemove, isMi
                       onClick={() => toggleEventDetails(b.id)}
                       className="text-[9px] font-black uppercase tracking-widest text-neutral-700 hover:text-neutral-500 transition-colors cursor-pointer flex items-center gap-1.5"
                     >
-                      {showEventDetails[b.id] ? '▼' : '▶'} {b.caratGain.eventDetails.length} Events
+                      {showEventDetails[b.id] ? '▼' : '▶'} {b.caratGain.eventDetails.length} Events included
                     </button>
                     {showEventDetails[b.id] && (
                       <div className="mt-2 max-h-24 overflow-y-auto space-y-1 pl-2 border-l border-neutral-800 no-scrollbar">
