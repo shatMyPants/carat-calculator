@@ -3,13 +3,13 @@ import timelineBanners from '../timeline_banners.json'
 import jpPvp from '../jp_pvp.json'
 import jpEvents from '../jp_events.json'
 import incomeData from '../income.json'
-import type { IncomeSelections, PvpEvent, JpEvent, RawBanner } from './types'
+import type { IncomeSelections, PvpEvent, JpEvent, RawBanner, SelectedBanner } from './types'
 import { projectBannerEnDates } from './utils/dateProjection'
 import { calculateMonthlyIncome } from './utils/calculateMonthlyIncome'
 import { calculateCaratGainToBanner } from './utils/calculateCaratGain'
 import { IncomeSection } from './components/IncomeSection'
 import { BannerSection } from './components/BannerSection'
-import { BannerDetail } from './components/BannerDetail'
+import { SelectedBanners } from './components/SelectedBanners'
 import { SummaryCard } from './components/SummaryCard'
 import { TimelinePage } from './components/TimelinePage'
 
@@ -38,7 +38,7 @@ const defaultSelections: IncomeSelections = {
 export default function App() {
   const [page, setPage] = useState<Page>('calculator')
   const [selections, setSelections] = useState<IncomeSelections>(defaultSelections)
-  const [selectedBannerId, setSelectedBannerId] = useState<number | null>(null)
+  const [selectedBanners, setSelectedBanners] = useState<SelectedBanner[]>([])
   const [focusSide, setFocusSide] = useState<'list' | 'detail'>('list')
 
   const result = useMemo(
@@ -51,27 +51,56 @@ export default function App() {
     [],
   )
 
-  const selectedBanner = useMemo(
-    () => bannersWithEnDates.find((b) => b.id === selectedBannerId) ?? null,
-    [selectedBannerId, bannersWithEnDates],
-  )
+  const selectedBannersWithData = useMemo(() => {
+    // Sort selected banners by end date to calculate cumulative costs correctly
+    const sorted = [...selectedBanners].sort((a, b) => {
+      const bA = bannersWithEnDates.find(x => x.id === a.bannerId)
+      const bB = bannersWithEnDates.find(x => x.id === b.bannerId)
+      return (bA?.en_end_date || 0) - (bB?.en_end_date || 0)
+    })
 
-  const caratGain = useMemo(() => {
-    if (!selectedBanner) return null
-    return calculateCaratGainToBanner(
-      selectedBanner.en_end_date,
-      selections,
-      jpEvents as JpEvent[],
-      jpPvp as PvpEvent[],
-      incomeData,
-    )
-  }, [selectedBanner, selections])
+    let cumulativeCost = 0
+    return sorted.map((s) => {
+      const banner = bannersWithEnDates.find((b) => b.id === s.bannerId)
+      if (!banner) return null
 
-  const handleSelectBanner = (id: number | null) => {
-    setSelectedBannerId(id)
-    if (id !== null) {
-      setFocusSide('detail')
-    }
+      const caratGain = calculateCaratGainToBanner(
+        banner.en_end_date,
+        selections,
+        jpEvents as JpEvent[],
+        jpPvp as PvpEvent[],
+        incomeData,
+      )
+
+      cumulativeCost += s.pulls * 150
+      const netCarats = caratGain.carats - cumulativeCost
+
+      return {
+        ...banner,
+        pulls: s.pulls,
+        caratGain,
+        netCarats
+      }
+    }).filter(Boolean) as any[]
+  }, [selectedBanners, bannersWithEnDates, selections])
+
+  const handleToggleBanner = (id: number) => {
+    setSelectedBanners(prev => {
+      const exists = prev.find(b => b.bannerId === id)
+      if (exists) {
+        return prev.filter(b => b.bannerId !== id)
+      } else {
+        return [...prev, { bannerId: id, pulls: 0 }]
+      }
+    })
+  }
+
+  const handleUpdatePulls = (id: number, pulls: number) => {
+    setSelectedBanners(prev => prev.map(b => b.bannerId === id ? { ...b, pulls } : b))
+  }
+
+  const handleRemoveBanner = (id: number) => {
+    setSelectedBanners(prev => prev.filter(b => b.bannerId !== id))
   }
 
   const toggleFocus = () => {
@@ -116,13 +145,13 @@ export default function App() {
           
           <div className="flex flex-col md:flex-row gap-4 items-start relative">
             {/* Banner List Section */}
-            <div className={`transition-all duration-500 ease-in-out overflow-hidden
+            <div className={`transition-all duration-500 ease-in-out overflow-hidden md:sticky md:top-24 h-fit
               ${focusSide === 'list' ? 'flex-[1] min-w-0' : 'w-16 shrink-0'}`}
             >
               <BannerSection
                 banners={bannersWithEnDates}
-                selectedBannerId={selectedBannerId}
-                onSelect={handleSelectBanner}
+                selectedBannerIds={selectedBanners.map(b => b.bannerId)}
+                onToggle={handleToggleBanner}
                 selections={selections}
                 events={jpEvents as JpEvent[]}
                 pvpSchedule={jpPvp as PvpEvent[]}
@@ -154,14 +183,15 @@ export default function App() {
               </button>
             </div>
 
-            {/* Banner Detail Section */}
+            {/* Selected Banners Section */}
             <aside className={`transition-all duration-500 ease-in-out md:sticky md:top-24 h-fit
               ${focusSide === 'detail' ? 'flex-[1] min-w-0' : 'w-16 shrink-0'}`}
             >
-              {selectedBanner ? (
-                <BannerDetail 
-                  banner={selectedBanner} 
-                  caratGain={caratGain} 
+              {selectedBannersWithData.length > 0 ? (
+                <SelectedBanners 
+                  selectedBanners={selectedBannersWithData}
+                  onUpdatePulls={handleUpdatePulls}
+                  onRemove={handleRemoveBanner}
                   isMinimized={focusSide === 'list'}
                   onFocus={() => setFocusSide('detail')}
                 />
@@ -173,7 +203,7 @@ export default function App() {
                 >
                   {focusSide === 'list' ? (
                     <div className="flex flex-col items-center gap-4">
-                      <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Details</span>
+                      <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Selected</span>
                       <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-600">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -188,9 +218,9 @@ export default function App() {
                           <line x1="9" y1="3" x2="9" y2="21"></line>
                         </svg>
                       </div>
-                      <h3 className="text-neutral-400 font-medium mb-1">No Banner Selected</h3>
+                      <h3 className="text-neutral-400 font-medium mb-1">No Banners Selected</h3>
                       <p className="text-neutral-500 text-sm max-w-[200px]">
-                        Select a banner from the list to see detailed gain projections.
+                        Select banners from the list to see cumulative gain projections and plan your pulls.
                       </p>
                     </>
                   )}

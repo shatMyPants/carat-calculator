@@ -42,6 +42,11 @@ export interface IncomeSelections {
   daily_carats_pack: boolean
 }
 
+export interface SelectedBanner {
+  bannerId: number
+  pulls: number
+}
+
 /* ------------------------------------------------------------------ */
 /*  Event / PvP types                                                 */
 /* ------------------------------------------------------------------ */

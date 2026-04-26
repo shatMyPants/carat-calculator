@@ -26,14 +26,14 @@ function formatDate(sec: number) {
 interface CardProps {
   banner: Banner
   isSelected: boolean
-  onSelect: (id: number | null) => void
+  onToggle: (id: number) => void
   selections: IncomeSelections
   events: JpEvent[]
   pvpSchedule: PvpEvent[]
   incomeData: any
 }
 
-function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSchedule, incomeData }: CardProps) {
+function BannerCard({ banner, isSelected, onToggle, selections, events, pvpSchedule, incomeData }: CardProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
@@ -77,7 +77,7 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
           e.stopPropagation()
           return
         }
-        onSelect(isSelected ? null : banner.id)
+        onToggle(banner.id)
       }}
       className={`relative flex flex-col rounded-xl overflow-hidden transition-all border cursor-pointer
         ${isSelected
@@ -194,8 +194,8 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
 
 interface Props {
   banners: Banner[]
-  selectedBannerId: number | null
-  onSelect: (id: number | null) => void
+  selectedBannerIds: number[]
+  onToggle: (id: number) => void
   selections: IncomeSelections
   events: JpEvent[]
   pvpSchedule: PvpEvent[]
@@ -206,8 +206,8 @@ interface Props {
 
 export function BannerSection({
   banners,
-  selectedBannerId,
-  onSelect,
+  selectedBannerIds,
+  onToggle,
   selections,
   events,
   pvpSchedule,
@@ -263,23 +263,11 @@ export function BannerSection({
 
   if (isMinimized) {
     return (
-      <div 
+      <div
         onClick={onFocus}
         className="h-full min-h-[500px] rounded-2xl bg-neutral-900 border border-neutral-800 flex flex-col items-center py-8 cursor-pointer hover:bg-neutral-800/50 transition-colors"
       >
-        <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-6">Selection</span>
-        <div className="flex flex-col gap-2">
-           <div className="w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 flex items-center justify-center text-[10px] font-bold text-neutral-400">
-             {filtered.length}
-           </div>
-           <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-600/30 flex items-center justify-center text-red-500">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-               <line x1="3" y1="12" x2="21" y2="12"></line>
-               <line x1="3" y1="6" x2="21" y2="6"></line>
-               <line x1="3" y1="18" x2="21" y2="18"></line>
-             </svg>
-           </div>
-        </div>
+        <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-6">Select Banners</span>
       </div>
     )
   }
@@ -333,8 +321,8 @@ export function BannerSection({
           <div key={b.id} className="snap-start py-1">
             <BannerCard
               banner={b}
-              isSelected={b.id === selectedBannerId}
-              onSelect={onSelect}
+              isSelected={selectedBannerIds.includes(b.id)}
+              onToggle={onToggle}
               selections={selections}
               events={events}
               pvpSchedule={pvpSchedule}
