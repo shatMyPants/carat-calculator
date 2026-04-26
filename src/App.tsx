@@ -75,21 +75,19 @@ export default function App() {
           <nav className="flex gap-1 ml-auto">
             <button
               onClick={() => setPage('calculator')}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                page === 'calculator'
-                  ? 'bg-neutral-700/60 text-neutral-100'
-                  : 'text-neutral-500 hover:text-neutral-300'
-              }`}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${page === 'calculator'
+                ? 'bg-neutral-700/60 text-neutral-100'
+                : 'text-neutral-500 hover:text-neutral-300'
+                }`}
             >
               Calculator
             </button>
             <button
               onClick={() => setPage('timeline')}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                page === 'timeline'
-                  ? 'bg-neutral-700/60 text-neutral-100'
-                  : 'text-neutral-500 hover:text-neutral-300'
-              }`}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${page === 'timeline'
+                ? 'bg-neutral-700/60 text-neutral-100'
+                : 'text-neutral-500 hover:text-neutral-300'
+                }`}
             >
               Timeline
             </button>

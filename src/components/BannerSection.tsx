@@ -87,24 +87,24 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
     >
 
       {/* Header: Dates & Action */}
-      <div className="flex justify-between items-center px-6 py-3 border-b border-[var(--vp-c-divider)] bg-[var(--vp-c-bg-soft)]/30">
-        <div className="flex items-baseline gap-5">
-          <span className="text-xl font-extrabold text-[var(--vp-c-text-1)] tracking-tight">
+      <div className="flex justify-between items-center px-6 py-2 sm:py-3 border-b border-[var(--vp-c-divider)] bg-[var(--vp-c-bg-soft)]/30">
+        <div className="flex items-baseline gap-2 sm:gap-5">
+          <span className="text-xs sm:text-sm md:text-md font-extrabold text-[var(--vp-c-text-1)] tracking-tight">
             {formatDate(banner.en_start_date)} - {formatDate(banner.en_end_date)}
           </span>
-          <span className="text-xs text-neutral-500 font-semibold tracking-wide">
+          <span className="text-[0.5rem] sm:text-xs md:text-sm text-neutral-500 font-semibold tracking-wide">
             JP Date: {formatDate(banner.start_date)} - {formatDate(banner.end_date)}
           </span>
         </div>
 
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200
+        <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all duration-200
           ${isSelected ? 'bg-red-600 text-white scale-110 shadow-lg shadow-red-900/20' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'}`}>
           {isSelected ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 aspect-square">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
           ) : (
-            <span className="text-2xl font-light mb-0.5">+</span>
+            <span className="text-xl sm:text-2xl font-light mb-0.5">+</span>
           )}
         </div>
       </div>
@@ -138,10 +138,10 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
             style={{ scrollSnapType: isDragging ? 'none' : 'x mandatory' }}
-            className={`flex gap-8 pb-1 ${banner.targets.length > 2 ? 'overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none' : ''}`}
+            className="flex gap-4 sm:gap-8 pb-1 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none justify-center md:justify-start"
           >
             {banner.targets.map((t, i) => (
-              <div key={i} className="group/target flex items-center gap-4 flex-1 min-w-[200px] max-w-[260px] hover:max-w-[450px] transition-all duration-500 ease-in-out snap-start py-2">
+              <div key={i} className="group/target flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 shrink-0 min-w-[125px] sm:min-w-[200px] max-w-[20vw] sm:max-w-[200px] w-full sm:w-auto transition-all duration-500 ease-in-out snap-start py-2 text-center sm:text-left">
                 <div className="w-24 aspect-square rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                   <img
                     src={banner.bannerType === 0 ? "/carat-calculator/images/character.png" : "/carat-calculator/images/support.png"}
@@ -150,8 +150,8 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
                   />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <div className="text-base font-bold text-[var(--vp-c-text-1)] leading-tight mb-1 break-words">{t.charaName}</div>
-                  <div className="text-xs text-[var(--vp-c-text-2)] font-medium tracking-tight break-words">{t.cardTitle || t.supportCardTitle}</div>
+                  <div className="text-sm sm:text-base font-bold text-[var(--vp-c-text-1)] leading-tight mb-1 break-words">{t.charaName}</div>
+                  <div className="text-xs text-[var(--vp-c-text-2)] font-medium tracking-tight break-words hidden sm:inline-block">{t.cardTitle || t.supportCardTitle}</div>
                 </div>
               </div>
             ))}
@@ -159,10 +159,10 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
         </div>
 
         {/* Vertical Divider */}
-        <div className="h-16 w-px bg-neutral-800/60 shrink-0" />
+        <div className="h-16 w-px bg-neutral-800/60 shrink-0 hidden md:inline-block" />
 
         {/* Stats Entity (Right) */}
-        <div className="grid grid-cols-2 gap-x-12 gap-y-5 shrink-0 w-[380px]">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 shrink-0 w-[230px] hidden md:grid">
           <div className="flex flex-col">
             <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider mb-1 whitespace-nowrap">Carat Estimate</span>
             <span className="text-2xl font-bold text-[#4ADE80] tracking-tighter">{freeCarats.toLocaleString()}</span>
@@ -293,7 +293,7 @@ export function BannerSection({
       <p className="text-xs text-neutral-500 mb-4">{filtered.length} banners found</p>
 
       {/* Banner list container */}
-      <div 
+      <div
         onScroll={(e) => {
           const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
           if (scrollHeight - scrollTop <= clientHeight + 500 && hasMore) {
