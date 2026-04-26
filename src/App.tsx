@@ -39,6 +39,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('calculator')
   const [selections, setSelections] = useState<IncomeSelections>(defaultSelections)
   const [selectedBannerId, setSelectedBannerId] = useState<number | null>(null)
+  const [focusSide, setFocusSide] = useState<'list' | 'detail'>('list')
 
   const result = useMemo(
     () => calculateMonthlyIncome(selections, jpPvp as PvpEvent[]),
@@ -65,6 +66,17 @@ export default function App() {
       incomeData,
     )
   }, [selectedBanner, selections])
+
+  const handleSelectBanner = (id: number | null) => {
+    setSelectedBannerId(id)
+    if (id !== null) {
+      setFocusSide('detail')
+    }
+  }
+
+  const toggleFocus = () => {
+    setFocusSide(prev => prev === 'list' ? 'detail' : 'list')
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -101,18 +113,91 @@ export default function App() {
         <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
           <SummaryCard result={result} />
           <IncomeSection selections={selections} onChange={setSelections} />
-          <BannerSection
-            banners={bannersWithEnDates}
-            selectedBannerId={selectedBannerId}
-            onSelect={setSelectedBannerId}
-            selections={selections}
-            events={jpEvents as JpEvent[]}
-            pvpSchedule={jpPvp as PvpEvent[]}
-            incomeData={incomeData}
-          />
-          {selectedBanner && (
-            <BannerDetail banner={selectedBanner} caratGain={caratGain} />
-          )}
+          
+          <div className="flex flex-col md:flex-row gap-4 items-start relative">
+            {/* Banner List Section */}
+            <div className={`transition-all duration-500 ease-in-out overflow-hidden
+              ${focusSide === 'list' ? 'flex-[1] min-w-0' : 'w-16 shrink-0'}`}
+            >
+              <BannerSection
+                banners={bannersWithEnDates}
+                selectedBannerId={selectedBannerId}
+                onSelect={handleSelectBanner}
+                selections={selections}
+                events={jpEvents as JpEvent[]}
+                pvpSchedule={jpPvp as PvpEvent[]}
+                incomeData={incomeData}
+                isMinimized={focusSide === 'detail'}
+                onFocus={() => setFocusSide('list')}
+              />
+            </div>
+
+            {/* Swap Focus Button (Middle) */}
+            <div className="hidden md:flex items-center justify-center pt-32 shrink-0 z-20">
+              <button
+                onClick={toggleFocus}
+                className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-all shadow-xl flex items-center justify-center cursor-pointer group"
+                title="Swap Focus"
+              >
+                <svg 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className={`w-5 h-5 transition-transform duration-500 ${focusSide === 'detail' ? 'rotate-180' : ''}`}
+                >
+                  <polyline points="13 17 18 12 13 7"></polyline>
+                  <polyline points="6 17 11 12 6 7"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            {/* Banner Detail Section */}
+            <aside className={`transition-all duration-500 ease-in-out md:sticky md:top-24 h-fit
+              ${focusSide === 'detail' ? 'flex-[1] min-w-0' : 'w-16 shrink-0'}`}
+            >
+              {selectedBanner ? (
+                <BannerDetail 
+                  banner={selectedBanner} 
+                  caratGain={caratGain} 
+                  isMinimized={focusSide === 'list'}
+                  onFocus={() => setFocusSide('detail')}
+                />
+              ) : (
+                <div 
+                  onClick={() => setFocusSide('detail')}
+                  className={`rounded-2xl bg-neutral-900 border border-neutral-800 border-dashed transition-all duration-500 flex flex-col items-center justify-center min-h-[300px]
+                    ${focusSide === 'list' ? 'p-2 cursor-pointer hover:bg-neutral-800/50' : 'p-12 text-center'}`}
+                >
+                  {focusSide === 'list' ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Details</span>
+                      <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-600">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        </svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-neutral-800 flex items-center justify-center mb-4 text-neutral-600">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                      </div>
+                      <h3 className="text-neutral-400 font-medium mb-1">No Banner Selected</h3>
+                      <p className="text-neutral-500 text-sm max-w-[200px]">
+                        Select a banner from the list to see detailed gain projections.
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </aside>
+          </div>
         </main>
       )}
     </div>

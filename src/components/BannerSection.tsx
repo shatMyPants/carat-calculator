@@ -110,7 +110,7 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
       </div>
 
       {/* Content: Targets & Stats */}
-      <div className="flex px-6 py-6 items-center justify-between gap-10">
+      <div className="flex px-6 py-6 items-center justify-start gap-10">
         {/* Targets Entity (Left) */}
         <div className="flex-1 min-w-0 relative group/carousel">
           {banner.targets.length > 2 && (
@@ -162,7 +162,7 @@ function BannerCard({ banner, isSelected, onSelect, selections, events, pvpSched
         <div className="h-16 w-px bg-neutral-800/60 shrink-0 hidden md:inline-block" />
 
         {/* Stats Entity (Right) */}
-        <div className="grid grid-cols-2 gap-x-3 gap-y-5 shrink-0 w-[230px] hidden md:grid">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 shrink-0 w-[230px] hidden lg:grid">
           <div className="flex flex-col">
             <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider mb-1 whitespace-nowrap">Carat Estimate</span>
             <span className="text-2xl font-bold text-[#4ADE80] tracking-tighter">{freeCarats.toLocaleString()}</span>
@@ -200,6 +200,8 @@ interface Props {
   events: JpEvent[]
   pvpSchedule: PvpEvent[]
   incomeData: any
+  isMinimized?: boolean
+  onFocus?: () => void
 }
 
 export function BannerSection({
@@ -209,7 +211,9 @@ export function BannerSection({
   selections,
   events,
   pvpSchedule,
-  incomeData
+  incomeData,
+  isMinimized,
+  onFocus
 }: Props) {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<'all' | 'char' | 'support'>('all')
@@ -257,6 +261,29 @@ export function BannerSection({
     setVisibleCount(PAGE_SIZE)
   }
 
+  if (isMinimized) {
+    return (
+      <div 
+        onClick={onFocus}
+        className="h-full min-h-[500px] rounded-2xl bg-neutral-900 border border-neutral-800 flex flex-col items-center py-8 cursor-pointer hover:bg-neutral-800/50 transition-colors"
+      >
+        <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-6">Selection</span>
+        <div className="flex flex-col gap-2">
+           <div className="w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 flex items-center justify-center text-[10px] font-bold text-neutral-400">
+             {filtered.length}
+           </div>
+           <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-600/30 flex items-center justify-center text-red-500">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+               <line x1="3" y1="12" x2="21" y2="12"></line>
+               <line x1="3" y1="6" x2="21" y2="6"></line>
+               <line x1="3" y1="18" x2="21" y2="18"></line>
+             </svg>
+           </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <section id="banner-selector" className="rounded-2xl bg-neutral-900 border border-neutral-800 p-6">
       <h2 className="text-lg font-semibold mb-4">Select Target Banner</h2>
@@ -273,15 +300,15 @@ export function BannerSection({
                      placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500
                      transition-colors"
         />
-        <div className="flex gap-1">
+        <div className="flex bg-neutral-800 p-1 rounded-xl border border-neutral-700/50">
           {(['all', 'char', 'support'] as const).map((t) => (
             <button
               key={t}
               onClick={() => handleTypeFilterChange(t)}
-              className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer
+              className={`flex-1 sm:flex-none px-5 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer uppercase tracking-wider
                 ${typeFilter === t
-                  ? 'bg-red-600 text-white'
-                  : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                  ? 'bg-red-600 text-white shadow-lg shadow-red-900/20'
+                  : 'text-neutral-500 hover:text-neutral-300 hover:bg-neutral-700/50'
                 }`}
             >
               {t === 'all' ? 'All' : t === 'char' ? 'Character' : 'Support'}

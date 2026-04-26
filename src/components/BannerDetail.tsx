@@ -4,10 +4,35 @@ import type { Banner, CaratGainResult } from '../types'
 interface Props {
   banner: Banner
   caratGain: CaratGainResult | null
+  isMinimized?: boolean
+  onFocus?: () => void
 }
 
-export function BannerDetail({ banner, caratGain }: Props) {
+export function BannerDetail({ banner, caratGain, isMinimized, onFocus }: Props) {
   const [showEventDetails, setShowEventDetails] = useState(false)
+
+  if (isMinimized) {
+    return (
+      <div 
+        onClick={onFocus}
+        className="h-full min-h-[500px] rounded-2xl bg-neutral-900 border border-neutral-800 flex flex-col items-center py-8 cursor-pointer hover:bg-neutral-800/50 transition-colors"
+      >
+        <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-6">Detail</span>
+        <div className="flex flex-col gap-3 items-center">
+           <div className="w-10 h-10 rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden shadow-inner">
+              <img 
+                src={banner.bannerType === 0 ? "/carat-calculator/images/character.png" : "/carat-calculator/images/support.png"} 
+                alt={banner.targets[0]?.charaName} 
+                className="w-full h-full object-cover" 
+              />
+           </div>
+           <span className="[writing-mode:vertical-lr] rotate-180 text-[11px] font-bold text-neutral-400 tracking-tight max-h-[200px] overflow-hidden text-ellipsis">
+             {banner.targets[0]?.charaName}
+           </span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <section id="banner-detail" className="rounded-2xl bg-neutral-900 border border-neutral-800 p-6">
