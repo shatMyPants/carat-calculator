@@ -137,11 +137,10 @@ function BannerCard({ banner, isSelected, onToggle, selections, events, pvpSched
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            style={{ scrollSnapType: isDragging ? 'none' : 'x mandatory' }}
             className="flex gap-4 sm:gap-8 pb-1 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none justify-center md:justify-start"
           >
             {banner.targets.map((t, i) => (
-              <div key={i} className="group/target flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 shrink-0 min-w-[125px] sm:min-w-[200px] max-w-[20vw] sm:max-w-[200px] w-full sm:w-auto transition-all duration-500 ease-in-out snap-start py-2 text-center sm:text-left">
+              <div key={i} className="group/target flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 shrink-0 min-w-[125px] sm:min-w-[200px] max-w-[20vw] sm:max-w-[200px] w-full sm:w-auto transition-all duration-500 ease-in-out py-2 text-center sm:text-left">
                 <div className="w-24 aspect-square rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                   <img
                     src={banner.bannerType === 0 ? "/carat-calculator/images/character.png" : "/carat-calculator/images/support.png"}
@@ -315,10 +314,10 @@ export function BannerSection({
             setVisibleCount(c => c + PAGE_SIZE);
           }
         }}
-        className="space-y-4 max-h-[720px] overflow-y-auto no-scrollbar snap-y snap-mandatory pr-2 scroll-smooth"
+        className="space-y-4 max-h-[720px] overflow-y-auto no-scrollbar pr-2 scroll-smooth"
       >
         {filtered.slice(0, visibleCount).map((b) => (
-          <div key={b.id} className="snap-start py-1">
+          <div key={b.id} className="py-1">
             <BannerCard
               banner={b}
               isSelected={selectedBannerIds.includes(b.id)}

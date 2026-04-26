@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import timelineBanners from '../timeline_banners.json'
 import jpPvp from '../jp_pvp.json'
 import jpEvents from '../jp_events.json'
@@ -40,6 +40,13 @@ export default function App() {
   const [selections, setSelections] = useState<IncomeSelections>(defaultSelections)
   const [selectedBanners, setSelectedBanners] = useState<SelectedBanner[]>([])
   const [focusSide, setFocusSide] = useState<'list' | 'detail'>('list')
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const result = useMemo(
     () => calculateMonthlyIncome(selections, jpPvp as PvpEvent[]),
@@ -142,11 +149,11 @@ export default function App() {
         <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
           <SummaryCard result={result} />
           <IncomeSection selections={selections} onChange={setSelections} />
-          
+
           <div className="flex flex-col md:flex-row gap-4 items-start relative">
             {/* Banner List Section */}
             <div className={`transition-all duration-500 ease-in-out overflow-hidden md:sticky md:top-24 h-fit
-              ${focusSide === 'list' ? 'flex-[1] min-w-0' : 'w-16 shrink-0'}`}
+              ${isMobile ? 'w-full' : (focusSide === 'list' ? 'flex-[1] min-w-0' : 'md:w-16 md:shrink-0')}`}
             >
               <BannerSection
                 banners={bannersWithEnDates}
@@ -156,7 +163,7 @@ export default function App() {
                 events={jpEvents as JpEvent[]}
                 pvpSchedule={jpPvp as PvpEvent[]}
                 incomeData={incomeData}
-                isMinimized={focusSide === 'detail'}
+                isMinimized={!isMobile && focusSide === 'detail'}
                 onFocus={() => setFocusSide('list')}
               />
             </div>
@@ -168,14 +175,14 @@ export default function App() {
                 className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-all shadow-xl flex items-center justify-center cursor-pointer group"
                 title="Swap Focus"
               >
-                <svg 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  className={`w-5 h-5 transition-transform duration-500 ${focusSide === 'detail' ? 'rotate-180' : ''}`}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`w-5 h-5 transition-transform duration-500 ${focusSide === 'list' ? 'rotate-180' : ''}`}
                 >
                   <polyline points="13 17 18 12 13 7"></polyline>
                   <polyline points="6 17 11 12 6 7"></polyline>
@@ -185,23 +192,23 @@ export default function App() {
 
             {/* Selected Banners Section */}
             <aside className={`transition-all duration-500 ease-in-out md:sticky md:top-24 h-fit
-              ${focusSide === 'detail' ? 'flex-[1] min-w-0' : 'w-16 shrink-0'}`}
+              ${isMobile ? 'w-full' : (focusSide === 'detail' ? 'flex-[1] min-w-0' : 'md:w-16 md:shrink-0')}`}
             >
               {selectedBannersWithData.length > 0 ? (
-                <SelectedBanners 
+                <SelectedBanners
                   selectedBanners={selectedBannersWithData}
                   onUpdatePulls={handleUpdatePulls}
                   onRemove={handleRemoveBanner}
-                  isMinimized={focusSide === 'list'}
+                  isMinimized={!isMobile && focusSide === 'list'}
                   onFocus={() => setFocusSide('detail')}
                 />
               ) : (
-                <div 
+                <div
                   onClick={() => setFocusSide('detail')}
                   className={`rounded-2xl bg-neutral-900 border border-neutral-800 border-dashed transition-all duration-500 flex flex-col items-center justify-center min-h-[300px]
-                    ${focusSide === 'list' ? 'p-2 cursor-pointer hover:bg-neutral-800/50' : 'p-12 text-center'}`}
+                    ${(!isMobile && focusSide === 'list') ? 'p-2 cursor-pointer hover:bg-neutral-800/50' : 'p-12 text-center'}`}
                 >
-                  {focusSide === 'list' ? (
+                  {(!isMobile && focusSide === 'list') ? (
                     <div className="flex flex-col items-center gap-4">
                       <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Selected</span>
                       <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-600">
